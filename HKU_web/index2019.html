@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="2019.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script>
+$(document).ready(function() {
+	$("body").keypress(function(event) {
+		link="#link"+event.which
+      	$(link)[0].click();
+   	});
+   	$(".big").hover(function(){
+ 		$(".help").show();
+ 		}, function(){
+ 		$(".help").hide();
+});
+});
+</script>
+</head>
+<body>
+<div class="big">Just keyboard.</div>
+<div class="help">
+	0: STAT3600 <br>
+	1: CSCI9001 <br>
+	2: STAT3612 <br>
+	3: COMP2113 <br>
+	4: MATH3401 <br>
+	6: STAT3612 website <br>
+	9: MATH3904 <br>
+	b: HKUL Book <br>
+	d: HKU Drive <br>
+	e: HKU Gmail <br>
+	f: Facebook <br>
+	g: Gmail <br>
+	m: MATH Timetable <br>
+	p: HKU Portal <br>
+	t: Google Translate <br>
+	w: WolframAlpha <br>
+	y: YouTube <br>
+</div>
+<div class="small">Hint: use a larger screen</div>
+<a href="https://moodle.hku.hk/course/view.php?id=70556" id="link48"></a>
+<a href="https://moodle.hku.hk/course/view.php?id=68577" id="link49"></a>
+<a href="https://moodle.hku.hk/course/view.php?id=70561" id="link50"></a>
+<a href="https://moodle.hku.hk/course/view.php?id=73997" id="link51"></a>
+<a href="https://moodle.hku.hk/course/view.php?id=69754" id="link52"></a>
+<a href="http://www.statsoft.org/stat3612/" id="link54"></a>
+<a href="https://moodle.hku.hk/course/view.php?id=69759" id="link57"></a>
+<a href="http://booking.lib.hku.hk/Secure/FacilityStatusDate.aspx" id="link98"></a>
+<a href="https://drive.google.com/drive/u/1/my-drive" id="link100"></a>
+<a href="https://mail.google.com/mail/u/1/" id="link101"></a>
+<a href="https://www.facebook.com" id="link102"></a>
+<a href="https://mail.google.com/mail/u/0/" id="link103"></a>
+<a href="http://hkumath.hku.hk/~math/Timetable/timetable1920_S1.pdf" id="link109"></a>
+<a href="https://hkuportal.hku.hk" id="link112"></a>
+<a href="https://translate.google.com/#en/zh-TW/" id="link116"></a>
+<a href="https://www.wolframalpha.com/" id="link119"></a>
+<a href="https://www.youtube.com" id="link121"></a>
+
+<footer>
+<div class="foot">MakST@2019</div>
+</footer>
+</body>
+</html>

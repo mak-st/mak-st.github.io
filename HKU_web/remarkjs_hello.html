@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Slides</title>
+    <meta charset="utf-8">
+    <style>
+      body { font-family: "Calibri Light", sans-serif; }
+      h1, h2, h3, h4 {
+        font-weight: normal;
+      }
+      a {
+        text-decoration: none;
+        color: inherit;
+      }
+      .left-column {
+        color: #777;
+        width: 25%;
+        height: 92%;
+        float: left;
+      }
+      .left-column h1 {
+        font-size: 100%;
+      }
+      .left-column h2 {
+        font-size: 110%;      
+        color: #000;
+      }
+      .right-column {
+        width: 75%;
+        float: right;
+      }
+    </style>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    </script>
+    <script>
+MathJax = {
+  tex: {
+    inlineMath: [['$', '$']],
+  },
+};
+</script>
+  </head>
+  <body>
+    <textarea id="source">
+
+class: center, middle, inverse, title-slide
+
+# MATH4302
+## Algebra II
+
+---
+.left-column[
+## Field
+# Euclidean Domain
+# PID
+# UFD
+# Integral Domain
+# Commutative Ring
+]
+.right-column[
+- $\mathbb{Z}_p$ for prime $p$
+- $\mathbb{R},\mathbb{C}$
+- $\text{Frac}(R)$ for integral domain $R$
+ - $\mathbb{Q}=\text{Frac}(\mathbb{Z})$
+ - $\mathbb{Q}[i]=\text{Frac}(\mathbb{Z}[i])$
+- $R/I$ for maximal ideal $I\subset R$ comm ring
+]
+---
+.left-column[
+# Field
+## Euclidean Domain
+# PID
+# UFD
+# Integral Domain
+# Commutative Ring
+]
+.right-column[
+- Field $K$, $v(a)=0$ for $a\in K\backslash\lbrace0\rbrace$
+- $\mathbb{Z}$, $v(a)=|a|$ for $a\in\mathbb{Z}\backslash\lbrace0\rbrace$
+- $K[x]$ for field $K$, $v(f)=\deg(f)$ for $f\in K[x]\backslash\lbrace0\rbrace$
+- $K[[x]]$ for field $K$, $v(f)=\text{ord}(f)$ for $f\in K[[x]]\backslash\lbrace0\rbrace$
+]
+---
+.left-column[
+# Field
+# Euclidean Domain
+## PID
+# UFD
+# Integral Domain
+# Commutative Ring
+]
+.right-column[
+- $\mathbb{Z}_p$ for prime $p$
+- $R[x]$ for any integral domain $R$
+]
+---
+.left-column[
+# Field
+# Euclidean Domain
+# PID
+## UFD
+# Integral Domain
+# Commutative Ring
+]
+.right-column[
+- $\mathbb{Z}_p$ for prime $p$
+- $R[x]$ for any integral domain $R$
+]
+---
+.left-column[
+# Field
+# Euclidean Domain
+# PID
+# UFD
+## Integral Domain
+# Commutative Ring
+]
+.right-column[
+- $\mathbb{Z}_p$ for prime $p$
+- $R[x]$ for any integral domain $R$
+]
+---
+.left-column[
+# Field
+# Euclidean Domain
+# PID
+# UFD
+# Integral Domain
+## Commutative Ring
+]
+.right-column[
+- $\mathbb{Z}_p$ for prime $p$
+- $R[x]$ for any integral domain $R$
+]
+---
+# Python
+```py
+import HKU
+
+def print_list(list):
+    for i in list:
+        print(i)
+
+if __name__ == "__main__":
+    myCourse = HKU.courses(year=3, sem=2)
+    print_list(myCourse)
+```
+
+```
+## MATH3403 Functions of a complex variable
+## MATH4302 Algebra II
+## MATH4402 Analysis II
+## STAT4609 Big data analytics
+## COMP2119 Introduction to data structures and algorithms
+## CCHU9060 Games: Play, Learning and Society
+```
+
+
+    </textarea>
+    <script src="remark.js">
+    </script>
+    <script>
+      var slideshow = remark.create();
+    </script>
+  </body>
+</html>

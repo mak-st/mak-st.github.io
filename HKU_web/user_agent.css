@@ -1,0 +1,105 @@
+html {
+    color: -internal-root-color;
+}
+div {
+    display: block;
+}
+body {
+    display: block;
+    margin: 0px;
+}
+table {
+    border-collapse: separate;
+    white-space: pre-wrap !important;
+    line-height: normal;
+    font-weight: normal;
+    font-size: initial;
+    font-style: normal;
+    color: -internal-quirk-inherit;
+    text-align: start;
+    word-break: break-word;
+    font-family: monospace;
+    tab-size: 4;
+    border-spacing: 0px;
+    font-variant: normal;
+}
+tbody {
+    display: table-row-group;
+    vertical-align: middle;
+    border-color: inherit;
+}
+tr {
+    display: table-row;
+    vertical-align: inherit;
+    border-color: inherit;
+}
+td {
+    display: table-cell;
+    vertical-align: baseline;
+    padding: 0px !important;
+}
+
+.line-content {
+    padding: 0px 5px !important;
+}
+.line-number {
+    box-sizing: border-box;
+    width: 31px;
+    background-color: rgb(240, 240, 240);
+    user-select: none;
+    text-align: right;
+    color: rgb(128, 128, 128);
+    word-break: normal;
+    white-space: nowrap;
+    font-size: 9px;
+    font-family: Helvetica;
+    padding: 0px 4px !important;
+    border-right: 1px solid rgb(187, 187, 187) !important;
+}
+.line-number::before {
+    content: attr(value);
+}
+.line-gutter-backdrop {
+    box-sizing: border-box;
+    width: 31px;
+    background-color: rgb(240, 240, 240);
+    user-select: none;
+    position: absolute;
+    z-index: -1;
+    left: 0px;
+    top: 0px;
+    height: 100%;
+    padding: 0px 4px !important;
+    border-right: 1px solid rgb(187, 187, 187) !important;
+}
+
+.html-attribute-name {
+    color: rgb(153, 69, 0);
+}
+.html-attribute-value {
+    color: rgb(26, 26, 166);
+}
+.html-comment {
+    color: rgb(35, 110, 37);
+}
+.html-end-of-file {
+    color: rgb(255, 0, 0);
+    font-weight: bold;
+}
+.html-doctype {
+    color: rgb(192, 192, 192);
+}
+.html-tag {
+    color: rgb(136, 18, 128);
+}
+a {
+    text-decoration: none;
+    color: inherit;
+}
+.html-external-link {
+    color: rgb(0, 0, 238);
+    text-decoration: none;
+}
+.html-resource-link {
+    color: rgb(0, 0, 238);
+}
