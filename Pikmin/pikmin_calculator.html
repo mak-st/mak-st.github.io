@@ -163,14 +163,14 @@
                             <label class="text-xs font-bold text-slate-600">目標類型</label>
                             <div class="bg-slate-100 p-0.5 rounded-lg flex">
                                 <button
-                                    @click="goalType = 'coins'"
+                                    @click="toggleGoalType('coins')"
                                     :class="['px-3 py-1 text-xs font-medium rounded-md transition-all flex items-center gap-1', goalType === 'coins' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500']"
                                 >
                                     <i data-lucide="coins" class="w-3 h-3 text-amber-500"></i>
                                     目標金幣
                                 </button>
                                 <button
-                                    @click="goalType = 'flowers'"
+                                    @click="toggleGoalType('flowers')"
                                     :class="['px-3 py-1 text-xs font-medium rounded-md transition-all flex items-center gap-1', goalType === 'flowers' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500']"
                                 >
                                     <i data-lucide="flower-2" class="w-3 h-3 text-pink-500"></i>
@@ -183,8 +183,8 @@
                             <input
                                 type="number"
                                 min="0"
-                                max="999999"
-                                v-model.number="goalValue"
+                                :value="goalValue"
+                                @input="e => goalValue = e.target.value === '' ? '' : parseFloat(e.target.value)"
                                 class="w-full bg-[#FAF9F6] border border-slate-200 rounded-xl px-4 py-3 text-lg font-extrabold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all text-slate-800"
                             />
                             <div class="absolute right-4 top-1/2 transform -translate-y-1/2 flex items-center gap-1.5">
@@ -542,6 +542,19 @@
                     }
                 });
 
+                // Goal Type Switch Logic (Auto-conversion)
+                const toggleGoalType = (newType) => {
+                    if (newType === goalType.value) return;
+                    
+                    const currentVal = goalValue.value || 0;
+                    if (newType === 'flowers') {
+                        goalValue.value = Math.round(currentVal * 250);
+                    } else {
+                        goalValue.value = Math.round(currentVal / 250);
+                    }
+                    goalType.value = newType;
+                };
+
                 // Re-render lucide icons
                 const refreshIcons = () => {
                     nextTick(() => {
@@ -642,7 +655,8 @@
                     speedScenarios,
                     presets: PRESETS,
                     handlePresetSelect,
-                    resetToDefaults
+                    resetToDefaults,
+                    toggleGoalType // 導出切換方法
                 };
             }
         }).mount('#app');
