@@ -185,7 +185,6 @@
                                 min="0"
                                 max="999999"
                                 v-model.number="goalValue"
-                                @input="handleGoalInput"
                                 class="w-full bg-[#FAF9F6] border border-slate-200 rounded-xl px-4 py-3 text-lg font-extrabold focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all text-slate-800"
                             />
                             <div class="absolute right-4 top-1/2 transform -translate-y-1/2 flex items-center gap-1.5">
@@ -205,28 +204,29 @@
                         </div>
                     </div>
 
-                    <!-- Squad Size Slider -->
+                    <!-- Squad Size Selector -->
                     <div class="space-y-2">
                         <div class="flex justify-between items-center">
                             <span class="text-xs font-bold text-slate-600 flex items-center gap-1">
                                 <i data-lucide="users" class="w-3.5 h-3.5 text-emerald-600"></i>
-                                隊伍規模 (Squad Size)
+                                隊伍規模 (消耗速率)
                             </span>
-                            <span class="text-sm font-extrabold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100">
-                                {{ squadSize }} 隻
+                            <span class="text-[11px] font-extrabold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100">
+                                {{ calculations.bracketDesc }}
                             </span>
                         </div>
-                        <input
-                            type="range"
-                            min="1"
-                            max="40"
-                            v-model.number="squadSize"
-                            class="w-full accent-emerald-600 h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer"
-                        />
-                        <div class="flex justify-between text-[10px] text-slate-400 font-medium px-0.5">
-                            <span>1 隻 (單人)</span>
-                            <span>20 隻</span>
-                            <span>40 隻 (滿編)</span>
+                        <div class="grid grid-cols-5 gap-1.5">
+                            <button
+                                v-for="bracket in squadBrackets"
+                                :key="bracket.id"
+                                @click="selectedSquadId = bracket.id"
+                                :class="['py-2 px-0.5 text-[10px] font-bold rounded-lg transition-all border', 
+                                         selectedSquadId === bracket.id 
+                                         ? 'bg-emerald-50 border-emerald-400 text-emerald-800 ring-1 ring-emerald-500/20 shadow-sm' 
+                                         : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100']"
+                            >
+                                <div class="text-center tracking-tighter">{{ bracket.label }}</div>
+                            </button>
                         </div>
                     </div>
 
@@ -386,7 +386,7 @@
                             <i data-lucide="info" class="w-4 h-4 text-emerald-300 flex-shrink-0 mt-0.5"></i>
                             <div>
                                 <span class="font-semibold block text-emerald-200">✨ 核心機制提示：</span>
-                                增加隊伍規模會讓種植更快速，但<strong>不會</strong>降低單片花瓣的產出效益！要省花瓣的唯一秘訣就是「提高移動速度」。
+                                隊伍規模會改變「每分鐘消耗花瓣數」(2~6片/分)，但單片花瓣產出的花朵數是<strong>恆定的</strong>，完全取決於您的移動速度！
                             </div>
                         </div>
                     </div>
@@ -454,9 +454,9 @@
                         <div class="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100/60">
                             <h3 class="font-bold text-indigo-800 text-sm flex items-center gap-1 mb-1.5">
                                 <span class="bg-indigo-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px]">1</span>
-                                花瓣消耗率的真相
+                                花瓣消耗率的階梯機制
                             </h3>
-                            <p>最新的分析表明，<strong>隊伍人數增加不會導致花瓣浪費！</strong>雖然人數增加時，每分鐘消耗的花瓣數（速率）會提高，但因為「每分鐘產花量」也同步提升，兩者相互抵銷後，單片花瓣的最終產出量是不變的。</p>
+                            <p>最新的分析表明，隊伍人數增加不會導致單片花瓣浪費！花瓣的消耗間隔依隊伍規模分為五個階梯：1-9隻(30秒)、10-19隻(20秒)、20-29隻(15秒)、30-39隻(12秒)、40隻(10秒)。消耗越快，每分鐘種花量也等比例提升。</p>
                         </div>
 
                         <div class="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100/60">
@@ -496,6 +496,14 @@
     <script>
         const { createApp, ref, computed, watch, onMounted, nextTick } = Vue;
 
+        const SQUAD_BRACKETS = [
+            { id: 1, label: '1-9 隻', petalsPerMin: 2, desc: '30秒' },
+            { id: 10, label: '10-19 隻', petalsPerMin: 3, desc: '20秒' },
+            { id: 20, label: '20-29 隻', petalsPerMin: 4, desc: '15秒' },
+            { id: 30, label: '30-39 隻', petalsPerMin: 5, desc: '12秒' },
+            { id: 40, label: '40 隻', petalsPerMin: 6, desc: '10秒' }
+        ];
+
         const PRESETS = {
             coins: [
                 { id: 'c-1', label: '1 枚測試', type: 'coins', value: 1 },
@@ -512,11 +520,11 @@
 
         createApp({
             setup() {
-                // State variables with new defaults
+                // State variables
                 const goalType = ref('coins');
                 const goalValue = ref(10);
-                const squadSize = ref(40);
-                const speed = ref(5.0); // Native internal speed is always km/h
+                const selectedSquadId = ref(40);
+                const speed = ref(5.0); 
                 const speedMode = ref('speed'); // 'speed' or 'pace'
                 const activeTab = ref('calculator');
 
@@ -555,25 +563,24 @@
                     const currentGoal = goalValue.value || 0;
                     const targetFlowers = goalType.value === 'coins' ? currentGoal * 250 : currentGoal;
 
-                    // 1. Calculate Base Planting Rate
-                    // Base formula: (Squad Size * 2.1) + 13
-                    const baseFlowersPerMin = (squadSize.value * 2.1) + 13;
+                    // 1. Get Petal Rate based on selected bracket
+                    const bracket = SQUAD_BRACKETS.find(b => b.id === selectedSquadId.value) || SQUAD_BRACKETS[4];
+                    const petalRate = bracket.petalsPerMin;
                     
-                    // 2. Apply Speed Multiplier
-                    // Using 5.0 km/h as the baseline 1.0x multiplier
-                    const speedFactor = speed.value / 5.0;
-                    const finalFlowersPerMin = baseFlowersPerMin * speedFactor;
+                    // 2. Speed Factor (5.0 km/h is baseline 1.0x)
+                    const speedFactor = speed.value > 0 ? speed.value / 5.0 : 0;
 
-                    // 3. Independent Efficiency Formula
-                    // "Efficiency only based on speed, independent of squad size"
-                    // Assume baseline efficiency at 5.0 km/h is 20 flowers per petal
-                    const baseEfficiency = 20.0; 
+                    // 3. Efficiency Formula (Strictly independent of squad size!)
+                    // At baseline 5.0 km/h, assume 1 petal exactly = 18 flowers (基於實測 30分/10金幣 推算)
+                    const baseEfficiency = 18.0; 
                     const flowersPerPetal = baseEfficiency * speedFactor;
+                    
+                    // 4. Final planting rate
+                    const finalFlowersPerMin = petalRate * flowersPerPetal;
 
-                    // 4. Reverse calculate requirements
+                    // 5. Reverse calculate requirements
                     const totalPetalsNeeded = flowersPerPetal > 0 ? targetFlowers / flowersPerPetal : 0;
                     const timeNeededMin = finalFlowersPerMin > 0 ? targetFlowers / finalFlowersPerMin : 0;
-                    const petalRate = timeNeededMin > 0 ? totalPetalsNeeded / timeNeededMin : 0;
                     const distanceKm = timeNeededMin * (speed.value / 60);
 
                     return {
@@ -583,11 +590,15 @@
                         timeNeededMin,
                         totalPetalsNeeded,
                         flowersPerPetal,
-                        distanceKm
+                        distanceKm,
+                        bracketDesc: `每分 ${petalRate} 片 (間隔 ${bracket.desc})`
                     };
                 });
 
                 const speedScenarios = computed(() => {
+                    const bracket = SQUAD_BRACKETS.find(b => b.id === selectedSquadId.value) || SQUAD_BRACKETS[4];
+                    const petalRate = bracket.petalsPerMin;
+
                     return [
                         { speed: 3.0, label: '🐢 3.0 km/h (散步)' },
                         { speed: 5.0, label: '🚶‍♂️ 5.0 km/h (標準)' },
@@ -595,8 +606,8 @@
                         { speed: 20.0, label: '🚴 20.0 km/h (單車)' }
                     ].map(scen => {
                         const sFactor = scen.speed / 5.0;
-                        const fpm = ((squadSize.value * 2.1) + 13) * sFactor;
-                        const efficiency = 20.0 * sFactor;
+                        const efficiency = 18.0 * sFactor;
+                        const fpm = petalRate * efficiency;
                         return {
                             ...scen,
                             efficiency: efficiency,
@@ -619,7 +630,7 @@
                 const resetToDefaults = () => {
                     goalType.value = 'coins';
                     goalValue.value = 10;
-                    squadSize.value = 40;
+                    selectedSquadId.value = 40;
                     speed.value = 5.0;
                     speedMode.value = 'speed';
                 };
@@ -627,7 +638,8 @@
                 return {
                     goalType,
                     goalValue,
-                    squadSize,
+                    selectedSquadId,
+                    squadBrackets: SQUAD_BRACKETS,
                     speed,
                     speedMode,
                     pace,
