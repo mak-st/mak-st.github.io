@@ -191,7 +191,7 @@
                                 <template v-if="goalType === 'coins'">
                                     <span class="text-xs font-medium text-slate-400">金幣</span>
                                     <span class="text-[10px] bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded-sm border border-amber-200">
-                                        = {{ goalValue * 250 }} 朵花
+                                        = {{ (goalValue || 0) * 250 }} 朵花
                                     </span>
                                 </template>
                                 <template v-else>
@@ -346,7 +346,7 @@
                                 約 {{ Math.ceil(calculations.totalPetalsNeeded) }} 片
                             </p>
                             <p class="text-[10px] text-emerald-200/60 mt-1">
-                                每片可產出 {{ Math.round(calculations.flowersPerPetal) }} 朵花
+                                每片可產出 {{ Math.round(calculations.flowersPerPetal * 10) / 10 }} 朵花
                             </p>
                         </div>
                     </div>
@@ -386,7 +386,7 @@
                             <i data-lucide="info" class="w-4 h-4 text-emerald-300 flex-shrink-0 mt-0.5"></i>
                             <div>
                                 <span class="font-semibold block text-emerald-200">✨ 核心機制提示：</span>
-                                隊伍規模會改變「每分鐘消耗花瓣數」(2~6片/分)，但單片花瓣產出的花朵數是<strong>恆定的</strong>，完全取決於您的移動速度！
+                                隊伍規模會改變「每分鐘消耗花瓣數」(2~6片/分)，但單片花瓣產出的花朵數是<strong>恆定的</strong>，完全取決於您的移動速度！官方介面推算約建立在 16.7 朵/片 的基礎上。
                             </div>
                         </div>
                     </div>
@@ -416,7 +416,7 @@
                                     <span v-if="Math.abs(scen.speed - speed) < 0.2" class="text-[9px] bg-indigo-600 text-white px-1.5 py-0.5 rounded-full font-normal">當前設定</span>
                                 </span>
                                 <span class="font-extrabold text-indigo-800">
-                                    每片產約 {{ Math.round(scen.efficiency) }} 朵
+                                    每片產約 {{ (Math.round(scen.efficiency * 10) / 10).toFixed(1) }} 朵
                                 </span>
                             </div>
                             
@@ -438,7 +438,7 @@
 
                 <footer class="text-center text-[11px] text-slate-400 space-y-1 py-4">
                     <p>《Pikmin Bloom》高級策略規劃計算器</p>
-                    <p>非官方規劃工具 (依賴最新線性效率公式)</p>
+                    <p>非官方規劃工具 (已根據 16.7 朵/片 基準校正)</p>
                 </footer>
             </template>
 
@@ -464,7 +464,7 @@
                                 <span class="bg-emerald-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px]">2</span>
                                 速度才是唯一的關鍵
                             </h3>
-                            <p>影響「單片花瓣產出幾朵花」的唯一變數是您的<strong>移動速度</strong>。無論您帶 1 隻還是 40 隻皮克敏，只要速度一樣，把一罐花瓣全部種完所產出的花朵總數是一樣的。想要省花瓣，就必須加快腳步或騎乘單車！</p>
+                            <p>影響「單片花瓣產出幾朵花」的唯一變數是您的<strong>移動速度</strong>。無論您帶 1 隻還是 40 隻皮克敏，只要速度一樣，把一罐花瓣全部種完所產出的花朵總數是一樣的。想要省花瓣，就必須加快腳步或騎乘單車！(官方基準約預設在單片 16.7 朵產出)</p>
                         </div>
 
                         <div class="bg-amber-50/50 p-4 rounded-xl border border-amber-100/60">
@@ -523,7 +523,7 @@
                 // State variables
                 const goalType = ref('coins');
                 const goalValue = ref(10);
-                const selectedSquadId = ref(40);
+                const selectedSquadId = ref(30); // 預設 30-39 區間
                 const speed = ref(5.0); 
                 const speedMode = ref('speed'); // 'speed' or 'pace'
                 const activeTab = ref('calculator');
@@ -571,8 +571,8 @@
                     const speedFactor = speed.value > 0 ? speed.value / 5.0 : 0;
 
                     // 3. Efficiency Formula (Strictly independent of squad size!)
-                    // At baseline 5.0 km/h, assume 1 petal exactly = 18 flowers (基於實測 30分/10金幣 推算)
-                    const baseEfficiency = 18.0; 
+                    // 這裡改為 16.7 朵 (為了完全對齊官方 350片/5900朵/70分的預估模型)
+                    const baseEfficiency = 16.7; 
                     const flowersPerPetal = baseEfficiency * speedFactor;
                     
                     // 4. Final planting rate
@@ -606,7 +606,7 @@
                         { speed: 20.0, label: '🚴 20.0 km/h (單車)' }
                     ].map(scen => {
                         const sFactor = scen.speed / 5.0;
-                        const efficiency = 18.0 * sFactor;
+                        const efficiency = 16.7 * sFactor; // 改為 16.7
                         const fpm = petalRate * efficiency;
                         return {
                             ...scen,
@@ -621,16 +621,10 @@
                     goalValue.value = preset.value;
                 };
 
-                const handleGoalInput = () => {
-                    if (goalValue.value < 0) {
-                        goalValue.value = 0;
-                    }
-                };
-
                 const resetToDefaults = () => {
                     goalType.value = 'coins';
                     goalValue.value = 10;
-                    selectedSquadId.value = 40;
+                    selectedSquadId.value = 30; // 預設 30-39
                     speed.value = 5.0;
                     speedMode.value = 'speed';
                 };
@@ -648,7 +642,6 @@
                     speedScenarios,
                     presets: PRESETS,
                     handlePresetSelect,
-                    handleGoalInput,
                     resetToDefaults
                 };
             }
