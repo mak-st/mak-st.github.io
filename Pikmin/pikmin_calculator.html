@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pikmin Bloom 高級策略規劃計算器</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- React & ReactDOM CDN -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <!-- Babel CDN (用於在瀏覽器中解析 JSX) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- 引入 Google Fonts 增加質感 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f1f7f2;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-0 sm:p-4">
+
+    <div id="root" class="w-full max-w-md bg-white min-h-screen sm:min-h-0 sm:rounded-3xl sm:shadow-xl overflow-hidden"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function PikminCalculator() {
+            // 狀態設定
+            const [goalType, setGoalType] = useState('coins'); // 'coins' | 'flowers'
+            const [goalValue, setGoalValue] = useState(9); // 預設 9 金幣
+            const [squadSize, setSquadSize] = useState(34); // 預設 34 隻
+            const [speed, setSpeed] = useState(5.2); // 預設 5.2 km/h
+
+            // 計算邏輯
+            const targetFlowers = goalType === 'coins' ? goalValue * 250 : goalValue;
+
+            // 1. 花瓣消耗率 (Time-based)
+            let consumptionRate = 1;
+            if (squadSize >= 40) consumptionRate = 5;
+            else if (squadSize >= 30) consumptionRate = 4;
+            else if (squadSize >= 20) consumptionRate = 3;
+            else if (squadSize >= 10) consumptionRate = 2;
+
+            // 2. 種植效率公式
+            const baseFlowersPerMin = squadSize * 2.1 + 13;
+            const speedFactor = speed / 5.2;
+            const finalFlowersPerMin = baseFlowersPerMin * speedFactor;
+
+            // 3. 逆向推算輸出
+            const timeRequired = finalFlowersPerMin > 0 ? targetFlowers / finalFlowersPerMin : 0;
+            const petalsRequired = timeRequired * consumptionRate;
+            const efficiency = consumptionRate > 0 ? finalFlowersPerMin / consumptionRate : 0;
+            const distance = timeRequired * (speed / 60);
+
+            // 一鍵設定驗證指標
+            const setVerificationPreset = () => {
+                setGoalType('coins');
+                setGoalValue(9);
+                setSquadSize(34);
+                setSpeed(5.2);
+            };
+
+            return (
+                <div class="flex flex-col h-full min-h-screen sm:min-h-0 bg-[#fafcf7]">
+                    {/* Header */}
+                    <div class="bg-gradient-to-r from-emerald-500 to-teal-600 text-white p-5 pt-8 sm:pt-5 pb-6 rounded-b-3xl shadow-md">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h1 class="text-xl font-bold tracking-wide">Pikmin Bloom</h1>
+                                <p class="text-xs text-emerald-100 mt-0.5">高級策略規劃計算器</p>
+                            </div>
+                            <span class="bg-emerald-400/30 text-emerald-100 text-xs px-2.5 py-1 rounded-full border border-emerald-300/30 font-medium">
+                                逆向任務模式
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* Main Content */}
+                    <div class="p-5 space-y-5 flex-1 overflow-y-auto">
+                        
+                        {/* 1. 目標設定 */}
+                        <div class="bg-white p-4 rounded-2xl shadow-xs border border-emerald-100/50">
+                            <div class="flex justify-between items-center mb-3">
+                                <label class="text-sm font-bold text-gray-700 flex items-center gap-1.5">
+                                    🎯 1. 設定規劃目標
+                                </label>
+                                {/* Toggle Switch */}
+                                <div class="bg-gray-100 p-0.5 rounded-lg flex text-xs font-medium">
+                                    <button 
+                                        onClick={() => { setGoalType('coins'); setGoalValue(9); }}
+                                        class={`px-3 py-1 rounded-md transition-all ${goalType === 'coins' ? 'bg-amber-400 text-amber-950 font-bold shadow-xs' : 'text-gray-500'}`}
+                                    >
+                                        金幣數
+                                    </button>
+                                    <button 
+                                        onClick={() => { setGoalType('flowers'); setGoalValue(2250); }}
+                                        class={`px-3 py-1 rounded-md transition-all ${goalType === 'flowers' ? 'bg-pink-400 text-white font-bold shadow-xs' : 'text-gray-500'}`}
+                                    >
+                                        種花數
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center gap-3 bg-gray-50 p-2.5 rounded-xl border border-gray-100">
+                                <input 
+                                    type="number" 
+                                    value={goalValue}
+                                    onChange={(e) => setGoalValue(Math.max(0, parseFloat(e.target.value) || 0))}
+                                    class="w-full bg-transparent text-xl font-bold text-gray-800 focus:outline-none px-2"
+                                />
+                                <span class="text-sm font-bold text-gray-500 whitespace-nowrap pr-2">
+                                    {goalType === 'coins' ? '枚金幣' : '朵花'}
+                                </span>
+                            </div>
+                            {goalType === 'coins' && (
+                                <p class="text-[11px] text-gray-400 mt-1.5 px-1">
+                                    * 自動換算：{goalValue} 金幣 = <span class="text-pink-500 font-medium">{targetFlowers}</span> 朵花 (1金幣/250花)
+                                </p>
+                            )}
+                        </div>
+
+                        {/* 2. 隊伍規模 */}
+                        <div class="bg-white p-4 rounded-2xl shadow-xs border border-emerald-100/50">
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="text-sm font-bold text-gray-700 flex items-center gap-1.5">
+                                    🎒 2. 隊伍規模 (Squad)
+                                </label>
+                                <span class="text-md font-extrabold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-md border border-emerald-100">
+                                    {squadSize} 隻
+                                </span>
+                            </div>
+                            <input 
+                                type="range" min="1" max="40" step="1"
+                                value={squadSize}
+                                onChange={(e) => setSquadSize(parseInt(e.target.value))}
+                                class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-emerald-500 my-3"
+                            />
+                            <div class="flex justify-between text-[11px] text-gray-400 font-medium">
+                                <span>1 隻</span>
+                                <span>10 隻</span>
+                                <span>20 隻</span>
+                                <span>30 隻</span>
+                                <span>40 隻</span>
+                            </div>
+                            <div class="mt-2 text-xs bg-emerald-50/50 text-emerald-700 p-2 rounded-xl flex justify-between items-center">
+                                <span>當前隊伍花瓣消耗速率：</span>
+                                <span class="font-bold bg-emerald-100 px-2 py-0.5 rounded text-emerald-800">{consumptionRate} 片 / 分鐘</span>
+                            </div>
+                        </div>
+
+                        {/* 3. 步行速度 */}
+                        <div class="bg-white p-4 rounded-2xl shadow-xs border border-emerald-100/50">
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="text-sm font-bold text-gray-700 flex items-center gap-1.5">
+                                    ⚡ 3. 預估步行時速
+                                </label>
+                                <span class="text-md font-extrabold text-teal-600 bg-teal-50 px-2.5 py-0.5 rounded-md border border-teal-100">
+                                    {speed} km/h
+                                </span>
+                            </div>
+                            <input 
+                                type="range" min="1" max="12" step="0.1"
+                                value={speed}
+                                onChange={(e) => setSpeed(parseFloat(e.target.value))}
+                                class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-teal-500 my-3"
+                            />
+                            <div class="flex justify-between text-[11px] text-gray-400 font-medium">
+                                <span>1 km/h (極慢)</span>
+                                <span>5.2 (標準)</span>
+                                <span>12 km/h (上限)</span>
+                            </div>
+                        </div>
+
+                        {/* 4. 逆向推算結果區域 */}
+                        <div class="bg-gradient-to-br from-gray-900 to-slate-800 text-white p-5 rounded-2xl shadow-lg space-y-4 relative overflow-hidden">
+                            <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-white/5 rounded-full pointer-events-none"></div>
+                            
+                            <h3 class="text-sm font-bold text-emerald-400 tracking-wider flex items-center gap-1.5 border-b border-gray-700 pb-2">
+                                📋 規劃產出報告 (Output)
+                            </h3>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="bg-white/5 p-3 rounded-xl border border-white/5">
+                                    <p class="text-xs text-gray-400 mb-0.5">⏱️ 預計所需時間</p>
+                                    <p class="text-lg font-bold text-white">
+                                        {timeRequired.toFixed(1)} <span class="text-xs font-normal text-gray-300">分鐘</span>
+                                    </p>
+                                </div>
+                                <div class="bg-white/5 p-3 rounded-xl border border-white/5">
+                                    <p class="text-xs text-gray-400 mb-0.5">🌸 所需花瓣總數</p>
+                                    <p class="text-lg font-bold text-pink-400">
+                                        {Math.ceil(petalsRequired)} <span class="text-xs font-normal text-gray-300">片</span>
+                                    </p>
+                                </div>
+                                <div class="bg-white/5 p-3 rounded-xl border border-white/5">
+                                    <p class="text-xs text-gray-400 mb-0.5">📊 每片花瓣效益</p>
+                                    <p class="text-lg font-bold text-amber-400">
+                                        {efficiency.toFixed(1)} <span class="text-xs font-normal text-gray-300">朵/片</span>
+                                    </p>
+                                </div>
+                                <div class="bg-white/5 p-3 rounded-xl border border-white/5">
+                                    <p class="text-xs text-gray-400 mb-0.5">🗺️ 預計步行距離</p>
+                                    <p class="text-lg font-bold text-teal-400">
+                                        {distance.toFixed(2)} <span class="text-xs font-normal text-gray-300">km</span>
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* 動態提示 */}
+                            <div class="text-[11px] text-gray-400 leading-relaxed pt-1 border-t border-gray-800">
+                                💡 <span class="text-emerald-300">動態提示：</span>已根據 11-12 分配速（約 5.2km/h）實測優化。當前條件下，每分鐘可種植 <span class="text-white font-medium">{finalFlowersPerMin.toFixed(1)}</span> 朵花。速度越快，每片花瓣的種植收益越高！
+                            </div>
+                        </div>
+
+                        {/* 5. 基準驗證與重設按鈕 */}
+                        <div class="flex gap-2">
+                            <button 
+                                onClick={setVerificationPreset}
+                                class="w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold py-2.5 px-4 rounded-xl border border-emerald-200 transition-colors flex items-center justify-center gap-1.5"
+                            >
+                                🔄 載入 9金幣/34隻/5.2k 官方驗證基準
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<PikminCalculator />);
+    </script>
+</body>
+</html>
